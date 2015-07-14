@@ -52,8 +52,6 @@ public class DataFrame extends Frame {
 			channel = (short) (bf_payload.get() & 0xff);
 		}
 
-		// int valuesNumber = bf_payload.limit() / type.getByteLength();
-
 		this.values = new TreeMap<Short, Float>();
 		while (bf_payload.remaining() > 0) {
 			// Read Channel
