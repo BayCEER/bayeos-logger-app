@@ -2,8 +2,9 @@ package de.unibayreuth.bayeosloggerapp.frames.bayeos;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import de.unibayreuth.bayeosloggerapp.tools.NumberConverter;
 
@@ -13,7 +14,7 @@ public class DataFrame extends Frame {
 
 	private byte dataFrameType;
 	private Frame.Number valueType;
-	private Hashtable<Short, Float> values;
+	private Map<Short, Float> values;
 
 	public DataFrame(byte[] payload) {
 
@@ -51,10 +52,9 @@ public class DataFrame extends Frame {
 			channel = (short) (bf_payload.get() & 0xff);
 		}
 
-		int valuesNumber = bf_payload.limit() / type.getByteLength();
+		// int valuesNumber = bf_payload.limit() / type.getByteLength();
 
-		Hashtable<Short, Float> values = new Hashtable<Short, Float>(
-				valuesNumber);
+		this.values = new TreeMap<Short, Float>();
 		while (bf_payload.remaining() > 0) {
 			// Read Channel
 			if (dm == DATAFRAME_WITH_CHANNEL_INDEX) {
@@ -66,8 +66,7 @@ public class DataFrame extends Frame {
 
 			values.put(channel,
 					(Float) NumberConverter.getNumber(bf_payload, type));
-		}
-		this.values = values;
+		}		
 		this.valueType = type;
 		this.dataFrameType = dm;
 
@@ -106,7 +105,8 @@ public class DataFrame extends Frame {
 		return "Data Frame with Value Type " + valtype + sb.toString();
 	}
 
-	public Hashtable<Short, Float> getValues() {
+	
+	public Map<Short, Float> getValues() {
 		return values;
 	}
 
