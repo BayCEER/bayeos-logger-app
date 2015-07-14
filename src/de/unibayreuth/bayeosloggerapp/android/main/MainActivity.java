@@ -342,13 +342,11 @@ public class MainActivity extends AppCompatActivity {
 	 * Adds a new frame to the queue of messages to be sent to the logger
 	 * 
 	 * @author Christiane Goehring
+	 * @author Oliver Archner 
 	 */
 	protected void addToQueue(byte[] serialFrame) {
 
 		try {
-			if (liveDataStarted) {
-				writeQueue.put(SerialFrame.modeStop);
-			}
 			writeQueue.put(serialFrame);
 		} catch (InterruptedException e) {
 			if (loggingenabled)
