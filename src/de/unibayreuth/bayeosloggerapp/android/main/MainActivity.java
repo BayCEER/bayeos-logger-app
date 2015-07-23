@@ -240,7 +240,10 @@ public class MainActivity extends AppCompatActivity {
 		ftD2xx.getDeviceInfoList(devCount, deviceList);
 
 		if (devCount <= 0) {
+			LOG.warn("No logger device found.");
 			return false;
+		} else {
+			LOG.debug("Found device: " + deviceList[0].description);
 		}
 
 		if (ftDev == null) {
