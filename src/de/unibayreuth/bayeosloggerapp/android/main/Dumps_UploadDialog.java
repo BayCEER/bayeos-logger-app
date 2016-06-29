@@ -10,6 +10,7 @@ import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Vector;
 
 import javax.net.ssl.HostnameVerifier;
@@ -19,6 +20,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,6 +139,8 @@ class UploadDataToGateway extends AsyncTask<String, String, Void> {
 	private Logger LOG = LoggerFactory.getLogger(UploadDataToGateway.class);
 
 	private Vector<SelectableTableRow> selectedRows;
+	private Vector<SelectableTableRow> uploadedRows;
+	
 	private String userName, passWord;
 	private ProgressDialog progress, cancel;
 	private String[][] results;
@@ -156,7 +160,8 @@ class UploadDataToGateway extends AsyncTask<String, String, Void> {
 		this.results = new String[3][selectedrows.size() + 1];
 		this.results[0][0] = "No.";
 		this.results[1][0] = "Name";
-		this.results[2][0] = "HTTP Status Code";
+		this.results[2][0] = "HTTP Status Code";		
+		this.uploadedRows = new Vector<SelectableTableRow>(20);
 
 	}
 
@@ -237,7 +242,7 @@ class UploadDataToGateway extends AsyncTask<String, String, Void> {
 			}
 			row = selectedRows.get(i);
 
-			results[0][i + 1] = i + 1 + "";
+			results[0][i + 1] = String.valueOf(i+1);
 			results[1][i + 1] = row.getRawFile().getName();
 
 			byte[] frames = null;
@@ -249,8 +254,7 @@ class UploadDataToGateway extends AsyncTask<String, String, Void> {
 							"An Exception occurred when reading a .db file: {}",
 							e1.getMessage());
 			}
-			Vector<DumpedFrame> dumpedFrames = DumpedFrame
-					.parseDumpFile(frames);
+			Vector<DumpedFrame> dumpedFrames = DumpedFrame.parseDumpFile(frames);
 
 			if (frames == null) {
 				break;
@@ -301,10 +305,16 @@ class UploadDataToGateway extends AsyncTask<String, String, Void> {
 							connection.getOutputStream());
 					writer.write(body);
 					writer.flush();
-
-					results[2][i + 1] = StringTools.httpCodeToString(((HttpURLConnection) connection)
-							.getResponseCode());
+										
+					int res = ((HttpURLConnection) connection).getResponseCode();
+					if (res == HttpURLConnection.HTTP_OK){
+						uploadedRows.add(row);
+					}										
+					results[2][i + 1] = StringTools.httpCodeToString(res);					
+					
 				}
+				
+				// 
 			} catch (MalformedURLException e) {
 				if (context.loggingEnabled())
 					LOG.warn("URL seems to be malformed: {}", e.getMessage());
@@ -315,6 +325,7 @@ class UploadDataToGateway extends AsyncTask<String, String, Void> {
 							e.getMessage());
 			}
 
+			
 		}
 
 		return null;
@@ -358,12 +369,11 @@ class UploadDataToGateway extends AsyncTask<String, String, Void> {
 
 	@Override
 	protected void onPostExecute(Void result) {
-		// check if there are any cells with no http status code (-> no
-		// connection)
-
+		// check if there are any cells with no http status code (-> no connection)
+		
 		for (int i = 0; i < results[0].length; i++) {
 			if (results[2][i] == null || results[2][i].isEmpty())
-				results[2][i] = "No Connection?";
+				results[2][i] = "No Connection?";			
 		}
 
 		if (progress.isShowing()) {
@@ -372,59 +382,21 @@ class UploadDataToGateway extends AsyncTask<String, String, Void> {
 		if (cancel != null && cancel.isShowing())
 			cancel.dismiss();
 
+		
 		View table = TableCreator.createTable(results, context);
-
-		LinearLayout v1 = new LinearLayout(context);
-		final CheckBox deleteFiles = new CheckBox(context);
-		deleteFiles.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-		deleteFiles.setText("Delete file(s)");
-		deleteFiles.setChecked(true);
-		v1.addView(deleteFiles);
-
-		int dps = TableCreator.getDps(context, 5);
-		v1.setPadding(dps, dps / 2, dps / 2, dps / 2);
-
-		final LinearLayout v2 = new LinearLayout(context);
-		final CheckBox deleteCSV = new CheckBox(context);
-		deleteCSV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-		deleteCSV.setText("Delete related CSV file (if existing)");
-		deleteCSV.setChecked(false);
-
-		v2.addView(deleteCSV);
-		MainActivity.enable(v2);
-
-		v2.setPadding(dps * 5, 0, 0, 0);
-
-		deleteFiles.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked) {
-				if (isChecked)
-					MainActivity.enable(v2);
-				else
-					MainActivity.disable(v2);
-			}
-		});
-
-		if (deleteFiles != null && deleteCSV != null) {
-			table = TableCreator.combineViews(table, v1, context);
-			table = TableCreator.combineViews(table, v2, context);
-		}
+		
+		
 
 		new AlertDialog.Builder(context)
 				.setTitle("Upload Report")
 				.setView(table)
 				.setPositiveButton(android.R.string.ok,
 						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int which) {
-								if (deleteFiles.isChecked())
-									Dumps_DeleteDialog.deleteFiles(
-											selectedRows,
-											deleteCSV.isChecked(), context);
+							public void onClick(DialogInterface dialog, int which) {									
+								Dumps_DeleteDialog.deleteFiles(uploadedRows, false, context);							
 							}
 						})
+				
 
 				.setIcon(android.R.drawable.ic_dialog_info).show();
 		ViewWrapper.forceWrapContent(table);
