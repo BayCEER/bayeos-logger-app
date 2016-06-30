@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">Logger App</string>
     <string name="action_info">About</string>
     <string name="set">Set</string>
@@ -8,7 +7,8 @@
     <string name="logger_connectToDevice">Connect to Device: </string>
     <string name="logger_switchOn">Connected</string>
     <string name="logger_switchOff">Disconnected</string>
-    <string name="logger_saveData">Dump Data</string>
+    <string name="logger_saveData">New Data</string>
+    <string name="logger_saveAllData">All Data</string>
     <string name="logger_eraseData">Erase Data</string>
     <string name="logger_version">Version: </string>
     <string name="logger_name">Name: </string>

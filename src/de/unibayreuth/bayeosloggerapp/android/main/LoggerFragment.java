@@ -64,13 +64,11 @@ public class LoggerFragment extends Fragment {
 	private boolean interruptDump = false;
 
 	private Switch sw_connection;
-	private Button btn_saveData, btn_eraseData, btn_setName,
-			btn_setSamplingInterval, btn_syncTime;
+	private Button btn_saveData, btn_saveAllData, btn_eraseData, btn_setName, btn_setSamplingInterval, btn_syncTime;
 	private TableLayout tbl_Layout;
 	private RelativeLayout lin_Layout;
 
-	private TextView eT_version, eT_currentDate, eT_dateofNextFrame,
-			eT_estimatedNewFrames;
+	private TextView eT_version, eT_currentDate, eT_dateofNextFrame, eT_estimatedNewFrames;
 	private EditText eT_name, eT_samplingInt;
 
 	private Tuple<Long, Instant> bytesAtTime;
@@ -194,6 +192,8 @@ public class LoggerFragment extends Fragment {
 				updateTime();
 			}
 		});
+		
+		
 
 		btn_saveData = (Button) view.findViewById(R.id.btn_logger_saveData);
 		btn_saveData.setOnClickListener(new OnClickListener() {
@@ -207,6 +207,16 @@ public class LoggerFragment extends Fragment {
 
 			}
 		});
+		
+		btn_saveAllData = (Button) view.findViewById(R.id.btn_logger_saveAllData);
+		btn_saveAllData.setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {						
+				((MainActivity) getActivity()).addToQueue(SerialFrame.startBinaryDump);
+				((MainActivity) getActivity()).setBufferCommand(CommandAndResponseFrame.BayEOS_StartBinaryDump);
+			}
+		});
+		
 
 		btn_eraseData = (Button) view.findViewById(R.id.btn_logger_eraseData);
 		btn_eraseData.setOnClickListener(new OnClickListener() {

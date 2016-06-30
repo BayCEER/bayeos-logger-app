@@ -184,6 +184,11 @@ public class CommandAndResponseFrame extends Frame {
 		return new CommandAndResponseFrame(new byte[] { frameType_Command,
 				BayEOS_ModeStop });
 	}
+	
+	public static Frame command_startBinaryDump() {
+		return new CommandAndResponseFrame(new byte[] { frameType_Command,
+				BayEOS_StartBinaryDump });
+	}
 
 	public static Frame command_startBinaryDump(Integer readPosition) {
 		byte[] bytes = new byte[4];
@@ -204,8 +209,9 @@ public class CommandAndResponseFrame extends Frame {
 	public static Frame command_startLiveData() {
 		return new CommandAndResponseFrame(new byte[] { frameType_Command,
 				BayEOS_StartLiveData });
-
 	}
+	
+	
 
 	@Override
 	public String toString() {

@@ -35,6 +35,10 @@ public class SerialFrame {
 
 	public static final byte[] startLiveData = SerialFrame
 			.toSerialFrame(CommandAndResponseFrame.command_startLiveData());
+	
+	public static final byte[] startBinaryDump = SerialFrame
+			.toSerialFrame(CommandAndResponseFrame.command_startBinaryDump());
+	
 
 	
 	public static final byte FRAME_DELIMITER = 0x7E;
